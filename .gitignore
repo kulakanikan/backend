@@ -1,4 +1,5 @@
 .env
-# deps
+.env.local
 node_modules/
-docs
+drizzle/
+docs/

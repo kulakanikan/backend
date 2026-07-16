@@ -5,6 +5,7 @@ import { errorHandler, notFound } from "./middleware/error-handler";
 import { success } from "./lib/response";
 import auth from "./routes/auth";
 import profile from "./routes/profile";
+import suppliersRoute from "./routes/suppliers";
 
 const app = new Hono().basePath("/api");
 
@@ -14,6 +15,7 @@ app.use("*", errorHandler);
 
 app.route("/auth", auth);
 app.route("/profile", profile);
+app.route("/suppliers", suppliersRoute);
 
 app.get("/health", (c) => c.json(success({ status: "ok", timestamp: new Date().toISOString() })));
 

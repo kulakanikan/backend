@@ -8,6 +8,7 @@ import profile from "./routes/profile";
 import suppliersRoute from "./routes/suppliers";
 import batchesRoute from "./routes/batches";
 import batchExpensesRoute from "./routes/batch-expenses";
+import buyersRoute from "./routes/buyers";
 
 const app = new Hono().basePath("/api");
 
@@ -20,6 +21,7 @@ app.route("/profile", profile);
 app.route("/suppliers", suppliersRoute);
 app.route("/batches", batchesRoute);
 app.route("/", batchExpensesRoute);
+app.route("/buyers", buyersRoute);
 
 app.get("/health", (c) => c.json(success({ status: "ok", timestamp: new Date().toISOString() })));
 

@@ -4,6 +4,7 @@ import { logger } from "hono/logger";
 import { errorHandler, notFound } from "./middleware/error-handler";
 import { success } from "./lib/response";
 import auth from "./routes/auth";
+import profile from "./routes/profile";
 
 const app = new Hono().basePath("/api");
 
@@ -12,6 +13,7 @@ app.use("*", cors());
 app.use("*", errorHandler);
 
 app.route("/auth", auth);
+app.route("/profile", profile);
 
 app.get("/health", (c) => c.json(success({ status: "ok", timestamp: new Date().toISOString() })));
 

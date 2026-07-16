@@ -1,6 +1,7 @@
 import {
   pgTable, uuid, varchar, decimal, timestamp, text, pgEnum
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 // Enums
 export const sumberInputEnum = pgEnum("sumber_input_type", ["voice", "manual"]);
@@ -56,7 +57,7 @@ export const buyers = pgTable("buyers", {
   userId: uuid("user_id").references(() => users.id).notNull(),
   nama: varchar("nama", { length: 255 }).notNull(),
   telepon: varchar("telepon", { length: 30 }),
-  tipePembeli: varchar("tipe_pembeli", { length: 50 }).notNull(),
+  tipePembeli: varchar("tipe_pembeli", { length: 50 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -96,3 +97,50 @@ export const receipts = pgTable("receipts", {
   statusKirimWa: statusKirimWaEnum("status_kirim_wa").notNull().default("belum_dikirim"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  suppliers: many(suppliers),
+  batches: many(batches),
+  buyers: many(buyers),
+}));
+
+export const suppliersRelations = relations(suppliers, ({ one, many }) => ({
+  user: one(users, { fields: [suppliers.userId], references: [users.id] }),
+  batches: many(batches),
+}));
+
+export const batchesRelations = relations(batches, ({ one, many }) => ({
+  user: one(users, { fields: [batches.userId], references: [users.id] }),
+  suppliers: one(suppliers, { fields: [batches.supplierId], references: [suppliers.id] }),
+  batchExpenses: many(batchExpenses),
+  sales: many(sales),
+}));
+
+export const batchExpensesRelations = relations(batchExpenses, ({ one }) => ({
+  batch: one(batches, { fields: [batchExpenses.batchId], references: [batches.id] }),
+}));
+
+export const buyersRelations = relations(buyers, ({ one, many }) => ({
+  user: one(users, { fields: [buyers.userId], references: [users.id] }),
+  sales: many(sales),
+}));
+
+export const salesRelations = relations(sales, ({ one, many }) => ({
+  batch: one(batches, { fields: [sales.batchId], references: [batches.id] }),
+  buyer: one(buyers, { fields: [sales.buyerId], references: [buyers.id] }),
+  payments: many(payments),
+  receipt: one(receipts),
+  saleExtras: many(saleExtras),
+}));
+
+export const saleExtrasRelations = relations(saleExtras, ({ one }) => ({
+  sale: one(sales, { fields: [saleExtras.saleId], references: [sales.id] }),
+}));
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  sale: one(sales, { fields: [payments.saleId], references: [sales.id] }),
+}));
+
+export const receiptsRelations = relations(receipts, ({ one }) => ({
+  sale: one(sales, { fields: [receipts.saleId], references: [sales.id] }),
+}));

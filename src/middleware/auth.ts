@@ -21,11 +21,13 @@ export async function authMiddleware(c: Context, next: Next) {
   }
 
   const token = authHeader.slice(7);
+  let payload;
   try {
-    const payload = await verifyJWT(token);
-    c.set("user", { id: payload.sub, email: payload.email, nama: payload.nama });
-    await next();
-  } catch {
+    payload = await verifyJWT(token);
+  } catch (e) {
     return c.json(error("UNAUTHORIZED", "Invalid or expired token"), 401);
   }
+
+  c.set("user", { id: payload.sub, email: payload.email, nama: payload.nama });
+  await next();
 }

@@ -5,6 +5,15 @@ import { errorHandler, notFound } from "./middleware/error-handler";
 import { success } from "./lib/response";
 import auth from "./routes/auth";
 import profile from "./routes/profile";
+import suppliersRoute from "./routes/suppliers";
+import batchesRoute from "./routes/batches";
+import batchExpensesRoute from "./routes/batch-expenses";
+import buyersRoute from "./routes/buyers";
+import salesRoute from "./routes/sales";
+import paymentsRoute from "./routes/payments";
+import receiptsRoute from "./routes/receipts";
+import dashboardRoute from "./routes/dashboard";
+import reportsRoute from "./routes/reports";
 
 const app = new Hono().basePath("/api");
 
@@ -14,6 +23,15 @@ app.use("*", errorHandler);
 
 app.route("/auth", auth);
 app.route("/profile", profile);
+app.route("/suppliers", suppliersRoute);
+app.route("/batches", batchesRoute);
+app.route("/", batchExpensesRoute);
+app.route("/buyers", buyersRoute);
+app.route("/sales", salesRoute);
+app.route("/", paymentsRoute);
+app.route("/receipts", receiptsRoute);
+app.route("/dashboard", dashboardRoute);
+app.route("/reports", reportsRoute);
 
 app.get("/health", (c) => c.json(success({ status: "ok", timestamp: new Date().toISOString() })));
 

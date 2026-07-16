@@ -1,7 +1,7 @@
 import { describe, expect, test, beforeAll, afterAll } from "bun:test";
 import { app } from "../../src/index";
 import { db } from "../../src/db/client";
-import { users, suppliers, batches, buyers, sales, saleExtras, receipts } from "../../src/db/schema";
+import { users, suppliers, batches, buyers, sales, saleExtras, receipts, payments } from "../../src/db/schema";
 import { signJWT } from "../../src/services/jwt";
 import { eq, inArray } from "drizzle-orm";
 
@@ -23,6 +23,7 @@ describe("Sales CRUD & Transaction Routes", () => {
     process.env.JWT_SECRET = "supersecretjwtkeywithatleast32characterslong";
 
     // Clean up
+    await db.delete(payments);
     await db.delete(receipts);
     await db.delete(saleExtras);
     await db.delete(sales);
@@ -279,5 +280,17 @@ describe("Sales CRUD & Transaction Routes", () => {
       headers: { Authorization: `Bearer ${tokenUser1}` },
     });
     expect(res.status).toBe(404);
+  });
+
+  afterAll(async () => {
+    // Clean up
+    await db.delete(payments);
+    await db.delete(receipts);
+    await db.delete(saleExtras);
+    await db.delete(sales);
+    await db.delete(batches).where(inArray(batches.userId, [testUserId1, testUserId2]));
+    await db.delete(suppliers).where(inArray(suppliers.userId, [testUserId1, testUserId2]));
+    await db.delete(buyers).where(inArray(buyers.userId, [testUserId1, testUserId2]));
+    await db.delete(users).where(inArray(users.id, [testUserId1, testUserId2]));
   });
 });

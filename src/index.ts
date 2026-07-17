@@ -14,6 +14,7 @@ import paymentsRoute from "./routes/payments";
 import receiptsRoute from "./routes/receipts";
 import dashboardRoute from "./routes/dashboard";
 import reportsRoute from "./routes/reports";
+import voiceRoute from "./routes/voice";
 
 const app = new Hono().basePath("/api");
 
@@ -32,6 +33,7 @@ app.route("/", paymentsRoute);
 app.route("/receipts", receiptsRoute);
 app.route("/dashboard", dashboardRoute);
 app.route("/reports", reportsRoute);
+app.route("/voice", voiceRoute);
 
 app.get("/health", (c) => c.json(success({ status: "ok", timestamp: new Date().toISOString() })));
 

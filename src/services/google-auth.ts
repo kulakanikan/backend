@@ -16,7 +16,11 @@ export async function verifyGoogleToken(idToken: string): Promise<GoogleUserInfo
 
   const data = await response.json() as Record<string, string>;
 
-  if (data.aud !== process.env.GOOGLE_CLIENT_ID) {
+  const expectedClientId = process.env.GOOGLE_CLIENT_ID;
+  const audienceMatches =
+    data.aud === expectedClientId || data.azp === expectedClientId;
+
+  if (!audienceMatches) {
     throw new Error("Token audience mismatch — token bukan untuk app ini");
   }
 

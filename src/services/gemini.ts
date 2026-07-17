@@ -184,7 +184,7 @@ Jangan menebak nilai yang tidak ada di teks.
 Untuk field numerik, kembalikan angka (bukan string).`;
 
   try {
-    const model = getGenAI().getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = getGenAI().getGenerativeModel({ model: "gemini-3.5-flash" });
     const prompt = `${systemPrompt}\n\nTeks:\n${transcript}`;
     const result = await model.generateContent(prompt);
     const responseText = result.response.text().trim();
@@ -234,7 +234,7 @@ Jangan menebak nilai yang tidak ada di rekaman audio.
 Untuk field numerik, kembalikan angka (bukan string).`;
 
   try {
-    const model = getGenAI().getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = getGenAI().getGenerativeModel({ model: "gemini-3.5-flash" });
     const result = await model.generateContent([
       {
         inlineData: {
@@ -265,5 +265,42 @@ Untuk field numerik, kembalikan angka (bukan string).`;
   } catch (err) {
     console.error(`[Gemini] Failed to parse ${formType} audio:`, err);
     return empty;
+  }
+}
+
+/**
+ * Menghasilkan ringkasan bisnis cerdas berbasis data dashboard menggunakan Gemini 1.5 Flash.
+ */
+export async function generateDashboardAiSummary(data: {
+  omzet: number;
+  laba_riil_total: number;
+  stok_tersisa_kg: number;
+  total_piutang: number;
+  top_batch: Array<{ jenis_ikan: string; laba_riil: number }>;
+  insights: Array<{ jenis_ikan: string; kondisi_kualitas: string; rasio_susut_persen: string }>;
+}): Promise<string> {
+  const prompt = `Kamu adalah asisten bisnis AI pintar untuk distributor ikan (Juragan Ikan).
+Berikan analisis bisnis singkat, padat, dan motivasional (maksimal 3 kalimat) dalam bahasa Indonesia santun dan profesional berdasarkan data toko berikut:
+
+- Omzet Penjualan: Rp ${data.omzet.toLocaleString("id-ID")}
+- Keuntungan Bersih (Laba Riil): Rp ${data.laba_riil_total.toLocaleString("id-ID")}
+- Stok Ikan di Gudang: ${data.stok_tersisa_kg} Kg
+- Total Piutang Tempo (Belum Lunas): Rp ${data.total_piutang.toLocaleString("id-ID")}
+- 3 Produk Paling Menguntungkan: ${data.top_batch.map(b => `${b.jenis_ikan} (Laba: Rp ${b.laba_riil.toLocaleString("id-ID")})`).join(", ") || "-"}
+- Rasio Penyusutan/Rusak Terbesar: ${data.insights.map(i => `${i.jenis_ikan} [${i.kondisi_kualitas}] (${i.rasio_susut_persen})`).join(", ") || "-"}
+
+Tujuan utama analisis:
+1. Sorot apakah keuangan sehat (bandingkan laba vs piutang tempo).
+2. Sebutkan produk/ikan mana yang paling sukses.
+3. Berikan saran operasional cepat (misalnya mengurangi penyusutan atau mempercepat penagihan piutang).
+Jangan gunakan format markdown berlebihan seperti bullet points, gunakan 2-3 kalimat paragraf biasa saja.`;
+
+  try {
+    const model = getGenAI().getGenerativeModel({ model: "gemini-3.5-flash" });
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (err) {
+    console.error("[Gemini] Failed to generate dashboard summary:", err);
+    return "Gagal memuat ringkasan bisnis AI saat ini. Silakan coba beberapa saat lagi.";
   }
 }

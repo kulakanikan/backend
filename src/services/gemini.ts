@@ -184,7 +184,7 @@ Jangan menebak nilai yang tidak ada di teks.
 Untuk field numerik, kembalikan angka (bukan string).`;
 
   try {
-    const model = getGenAI().getGenerativeModel({ model: "gemini-3.5-flash" });
+    const model = getGenAI().getGenerativeModel({ model: "gemini-3.1-flash-lite" });
     const prompt = `${systemPrompt}\n\nTeks:\n${transcript}`;
     const result = await model.generateContent(prompt);
     const responseText = result.response.text().trim();
@@ -234,7 +234,7 @@ Jangan menebak nilai yang tidak ada di rekaman audio.
 Untuk field numerik, kembalikan angka (bukan string).`;
 
   try {
-    const model = getGenAI().getGenerativeModel({ model: "gemini-3.5-flash" });
+    const model = getGenAI().getGenerativeModel({ model: "gemini-3.1-flash-lite" });
     const result = await model.generateContent([
       {
         inlineData: {
@@ -296,7 +296,7 @@ Tujuan utama analisis:
 Jangan gunakan format markdown berlebihan seperti bullet points, gunakan 2-3 kalimat paragraf biasa saja.`;
 
   try {
-    const model = getGenAI().getGenerativeModel({ model: "gemini-3.5-flash" });
+    const model = getGenAI().getGenerativeModel({ model: "gemini-3.1-flash-lite" });
     const result = await model.generateContent(prompt);
     return result.response.text().trim();
   } catch (err) {

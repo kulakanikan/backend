@@ -210,3 +210,60 @@ Untuk field numerik, kembalikan angka (bukan string).`;
     return empty;
   }
 }
+
+/**
+ * Parse file audio langsung menjadi data terstruktur menggunakan Gemini 1.5 Flash.
+ */
+export async function parseVoiceAudio(
+  audioBase64: string,
+  mimeType: string,
+  formType: FormType
+): Promise<VoiceSuggestion> {
+  const { schema, instructions } = FORM_PROMPTS[formType];
+  const empty = EMPTY_SUGGESTION[formType];
+
+  const systemPrompt = `Kamu adalah parser data form aplikasi distribusi ikan.
+${instructions}
+
+Ekstrak informasi dari rekaman audio yang diberikan.
+Kembalikan HANYA JSON dengan schema persis berikut, tanpa teks atau penjelasan lain:
+${schema}
+
+Jika suatu field tidak disebutkan dalam rekaman audio, isi dengan null.
+Jangan menebak nilai yang tidak ada di rekaman audio.
+Untuk field numerik, kembalikan angka (bukan string).`;
+
+  try {
+    const model = getGenAI().getGenerativeModel({ model: "gemini-1.5-flash" });
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: audioBase64,
+          mimeType: mimeType,
+        },
+      },
+      systemPrompt,
+    ]);
+    const responseText = result.response.text().trim();
+
+    // Strip markdown code fences jika ada
+    const jsonText = responseText
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim();
+
+    const parsed = JSON.parse(jsonText);
+
+    // Merge dengan empty untuk pastikan semua key ada (tidak ada key extra)
+    const merged: Record<string, any> = {};
+    for (const key of Object.keys(empty)) {
+      merged[key] = parsed[key] !== undefined ? parsed[key] : null;
+    }
+
+    return merged as VoiceSuggestion;
+  } catch (err) {
+    console.error(`[Gemini] Failed to parse ${formType} audio:`, err);
+    return empty;
+  }
+}

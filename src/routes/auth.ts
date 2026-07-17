@@ -58,6 +58,41 @@ auth.post(
   }
 );
 
+// DEV-ONLY: Login dengan google_sub langsung (tanpa OAuth flow)
+auth.post(
+  "/dev-login",
+  zValidator("json", z.object({ google_sub: z.string().min(1) })),
+  async (c) => {
+    const { google_sub } = c.req.valid("json");
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.googleSub, google_sub),
+    });
+
+    if (!user) {
+      return c.json(error("USER_NOT_FOUND", "User dengan google_sub tersebut tidak ditemukan"), 404);
+    }
+
+    const token = await signJWT({
+      sub: user.id,
+      email: user.email,
+      nama: user.nama,
+    });
+
+    return c.json(success({
+      token,
+      user: {
+        id: user.id,
+        nama: user.nama,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+        namaUsaha: user.namaUsaha,
+        teleponUsaha: user.teleponUsaha,
+      },
+    }));
+  }
+);
+
 auth.get("/me", authMiddleware, async (c) => {
   const { id } = c.get("user");
 

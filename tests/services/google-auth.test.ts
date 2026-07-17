@@ -33,6 +33,26 @@ describe("Google Token Verification Service", () => {
     expect(result.picture).toBe(mockUser.picture);
   });
 
+  test("should parse and return userInfo for valid token info with mobile azp audience", async () => {
+    const mockUser = {
+      sub: "google-sub-456",
+      email: "mobile@example.com",
+      name: "Mobile User",
+      picture: "",
+      aud: "accounts.google.com",
+      azp: "test-client-id",
+      exp: Math.floor((Date.now() + 100000) / 1000).toString(),
+    };
+
+    globalThis.fetch = mock(() =>
+      Promise.resolve(new Response(JSON.stringify(mockUser), { status: 200 }))
+    ) as any;
+
+    const result = await verifyGoogleToken("valid-id-token");
+    expect(result.sub).toBe(mockUser.sub);
+    expect(result.email).toBe(mockUser.email);
+  });
+
   test("should throw error if fetch failed", async () => {
     globalThis.fetch = mock(() =>
       Promise.resolve(new Response(JSON.stringify({}), { status: 400 }))

@@ -29,6 +29,7 @@ batchesRoute.get("/", async (c) => {
       : (b, { asc }) => [asc(b.diterimaAt)], // default FIFO
     with: {
       suppliers: { columns: { namaNelayan: true, telepon: true } },
+      batchExpenses: true,
     },
   });
 
